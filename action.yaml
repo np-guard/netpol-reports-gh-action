@@ -1,6 +1,16 @@
 name: 'K8s NetworkPolicy Reports'
-description: 'An action to annotate a PR with 2 comments: connectivity map and connectivity diff'
+description: 'An action to annotate a PR with two comments: connectivity map and connectivity diff'
 author: 'shift-left-netconfig project'
+
+inputs:
+  deployment-path:
+    description: The path in the repository where deployment yamls are
+    required: false
+    default: release
+  netpol-path:
+    description: The path in the repository where NetworkPolicy yamls are
+    required: false
+    default: release
 
 runs:
   using: 'composite'
@@ -13,11 +23,25 @@ runs:
         ref: ${{ github.base_ref }}
         path: old
     - name: Connectivity map
-      uses: docker://ghcr.io/shift-left-netconfig/nca:1.0
+      uses: docker://ghcr.io/shift-left-netconfig/nca:1.1.0
       with:
-        args: --connectivity /github/workspace/new --pod_list /github/workspace/new/release/kubernetes-manifests.yaml --ns_list /github/workspace/new/release --pr_url https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.number }}/comments --gh_token ${{ github.token }} --output_format md
+        args: >
+          --connectivity /github/workspace/new/${{ inputs.netpol-path }}
+          --pod_list /github/workspace/new/${{ inputs.deployment-path }}
+          --ns_list /github/workspace/new/${{ inputs.deployment-path }}
+          --pr_url https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.number }}/comments
+          --gh_token ${{ github.token }}
+          --output_format md
     - name: Connectivity diff
-      uses: docker://ghcr.io/shift-left-netconfig/nca:1.0
+      uses: docker://ghcr.io/shift-left-netconfig/nca:1.1.0
       with:
-        args: --semantic_diff /github/workspace/new --base_np_list /github/workspace/old --pod_list /github/workspace/new/release/kubernetes-manifests.yaml --ns_list /github/workspace/new/release --pr_url https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.number }}/comments --gh_token ${{ github.token }} --output_format md
+        args: >
+          --semantic_diff /github/workspace/new/${{ inputs.netpol-path }}
+          --base_np_list /github/workspace/old/${{ inputs.netpol-path }}
+          --pod_list /github/workspace/new/${{ inputs.deployment-path }}
+          --ns_list /github/workspace/new/${{ inputs.deployment-path }}
+          --pr_url https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.number }}/comments
+          --gh_token ${{ github.token }}
+          --output_format md
+          --return_0
  
