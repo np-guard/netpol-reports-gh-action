@@ -1,6 +1,9 @@
 name: 'K8s NetworkPolicy Connectivity Report'
 description: 'Produce a network-connectivity report of your K8s application'
 author: 'shift-left-netconfig project'
+branding:
+  icon: shield
+  color: green
 
 inputs:
   deployment-path:
