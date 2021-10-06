@@ -12,7 +12,7 @@ inputs:
     required: false
     default: .
   output-format:
-    description: Connectivity report format (either "md", "yaml", "csv" or "txt")
+    description: Connectivity report format (either "md", "yaml", "csv", "dot" or "txt")
     required: false
     default: md
 
