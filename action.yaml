@@ -1,47 +1,55 @@
-name: 'K8s NetworkPolicy Reports'
-description: 'An action to annotate a PR with two comments: connectivity map and connectivity diff'
+name: 'K8s NetworkPolicy Connectivity Report'
+description: 'Produce a network-connectivity report of your K8s application'
 author: 'shift-left-netconfig project'
 
 inputs:
   deployment-path:
     description: The path in the repository where deployment yamls are
     required: false
-    default: release
+    default: .
   netpol-path:
     description: The path in the repository where NetworkPolicy yamls are
     required: false
-    default: release
+    default: .
+  output-format:
+    description: Connectivity report format (either "md", "yaml", "csv" or "txt")
+    required: false
+    default: md
+
+outputs:
+  conn-results-artifact:
+    description: The name of the artifact containing the connectivity report
+    value: ${{ steps.output-results.outputs.conn-results-artifact }}
+  conn-results-file:
+    description: The name of the actual file in the artifact, which contains the connectivity report
+    value: ${{ steps.output-results.outputs.conn-results-file-name }}
 
 runs:
   using: 'composite'
   steps:
-    - uses: actions/checkout@v2
-      with:
-        path: new
-    - uses: actions/checkout@v2
-      with:
-        ref: ${{ github.base_ref }}
-        path: old
+    - name: Prepare output directory
+      shell: bash
+      run: |
+        mkdir -p ${{ github.workspace }}/netpol-reports-gh-action-output
+        chmod a+rw ${{ github.workspace }}/netpol-reports-gh-action-output
     - name: Connectivity map
-      uses: docker://ghcr.io/shift-left-netconfig/nca:1.1.0
+      uses: docker://ghcr.io/shift-left-netconfig/nca:1.2.0
       with:
         args: >
-          --connectivity /github/workspace/new/${{ inputs.netpol-path }}
-          --pod_list /github/workspace/new/${{ inputs.deployment-path }}
-          --ns_list /github/workspace/new/${{ inputs.deployment-path }}
-          --pr_url https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.number }}/comments
-          --gh_token ${{ github.token }}
-          --output_format md
-    - name: Connectivity diff
-      uses: docker://ghcr.io/shift-left-netconfig/nca:1.1.0
+          --connectivity /github/workspace/${{ inputs.netpol-path }}
+          --pod_list /github/workspace/${{ inputs.deployment-path }}
+          --ns_list /github/workspace/${{ inputs.deployment-path }}
+          --output_format ${{ inputs.output-format }}
+          --file_out /github/workspace/netpol-reports-gh-action-output/connectivity_report.${{ inputs.output-format }}
+    - name: Upload artifact
+      uses: actions/upload-artifact@v2
       with:
-        args: >
-          --semantic_diff /github/workspace/new/${{ inputs.netpol-path }}
-          --base_np_list /github/workspace/old/${{ inputs.netpol-path }}
-          --pod_list /github/workspace/new/${{ inputs.deployment-path }}
-          --ns_list /github/workspace/new/${{ inputs.deployment-path }}
-          --pr_url https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.number }}/comments
-          --gh_token ${{ github.token }}
-          --output_format md
-          --return_0
- 
+        name: connectivity-report
+        path: ${{ github.workspace }}/netpol-reports-gh-action-output/connectivity_report.${{ inputs.output-format }}
+    - name: Set outputs and clean
+      id: output-results
+      shell: bash
+      run: |
+        echo "::set-output name=conn-results-artifact::connectivity-report"
+        echo "::set-output name=conn-results-file-name::connectivity_report.${{ inputs.output-format }}"
+        rm -r ${{ github.workspace }}/netpol-reports-gh-action-output
