@@ -65,10 +65,7 @@ jobs:
       - uses: actions/download-artifact@v2
         with:
           name: ${{ steps.conn-report.outputs.conn-results-artifact }}
-      - name: comment PR
-        uses: machine-learning-apps/pr-comment@1.0.0
+      - run: gh pr comment  ${{ github.event.number }} -F ${{ steps.conn-report.outputs.conn-results-file }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          path: ${{ steps.conn-report.outputs.conn-results-file }}
 ```
