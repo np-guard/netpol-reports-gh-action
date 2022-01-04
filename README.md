@@ -18,7 +18,7 @@ An example connectivity report (in md format):
 ||[default]|[loadgenerator]|[default]|[frontend]|TCP 8080|
 ||[default]|[frontend]|[default]|[adservice]|TCP 9555|
 
-This action is part of a wider attempt to provide [shift-left automation for generating and maintaining Kubernetes Network Policies](https://shift-left-netconfig.github.io/).
+This action is part of a wider attempt to provide [shift-left automation for generating and maintaining Kubernetes Network Policies](https://np-guard.github.io/).
 
 ## Inputs
 ### deployment-path
