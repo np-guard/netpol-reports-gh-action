@@ -44,7 +44,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: shift-left-netconfig/netpol-reports-gh-action@v1
+      - uses: np-guard/netpol-reports-gh-action@v2
         with:
           output-format: csv
 ```
@@ -61,7 +61,7 @@ jobs:
       - uses: actions/checkout@v2
       - name: Produce connectivity report
         id: conn-report
-        uses: shift-left-netconfig/netpol-reports-gh-action@v1
+        uses: np-guard/netpol-reports-gh-action@v2
       - uses: actions/download-artifact@v2
         with:
           name: ${{ steps.conn-report.outputs.conn-results-artifact }}
