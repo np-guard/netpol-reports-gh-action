@@ -36,7 +36,7 @@ runs:
         mkdir -p ${{ github.workspace }}/netpol-reports-gh-action-output
         chmod a+rw ${{ github.workspace }}/netpol-reports-gh-action-output
     - name: Connectivity map
-      uses: docker://ghcr.io/shift-left-netconfig/nca:1.2.0
+      uses: docker://ghcr.io/np-guard/nca:1.2.0
       with:
         args: >
           --connectivity /github/workspace/${{ inputs.netpol-path }}
